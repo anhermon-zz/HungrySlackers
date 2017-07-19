@@ -4,14 +4,12 @@
 
 String.prototype.contains = function(x){return this.indexOf(x)>-1;}
 
-var server = 'http://172.16.50.88:9000/HungrySlackers';
-var openUrl = '/Invite';
-var joinUrl = '/join';
-var closeUrl = '/close';
+var server    = 'http://172.16.50.88:9000/HungrySlackers';
+var openUrl   = '/invite';
+var joinUrl   = '/join';
+var closeUrl  = '/finalize';
 var cancelUrl = '/cancel';
 
-
-var tempDishes;
 
 var tenBisDishesIndexUrl = 'https://www.10bis.co.il/ShoppingCart/DishesIndex';
 var orderConfirmationUrl = 'https://www.10bis.co.il/OrderConfirmation';
@@ -77,8 +75,18 @@ function getCurrentTabUrl(callback) {
  *   The callback gets a string that describes the failure reason.
  */
 function sendToServer(url, dataToSend, callback, errorCallback) {
-	$.post(url, callback)
-	.fail(errorCallback);
+	$.ajax({
+		url: url,
+		type: "POST",
+		contentType: "application/json",
+		dataType   : "json",
+		data: JSON.stringify(dataToSend),
+		success: callback,
+		fail: errorCallback		
+	});
+	
+	//$.post(url, dataToSend, callback)
+	//.fail(errorCallback);
 }
 
 function renderStatus(statusText) {
@@ -101,7 +109,7 @@ function addCommonData(data, res) {
 	//console.log(JSON.stringify(data));
 }
 function openNewOrder() {
-	baseAction(function(){
+	baseAction(function(url){
 		get10BisData(function(res) {
 			var data = { 
 					url: url				
@@ -119,15 +127,13 @@ function openNewOrder() {
 }
 
 function join() {
-	baseAction(function(){
+	baseAction(function(url){
 		get10BisData(function(tenBisData){
 			getOrderConfirmation(function(orderConfirmationData) {
 				var data = {
 					DishList : orderConfirmationData.DishList
 				};
 				
-				//temporary
-				tempDishes = data.DishList;
 				addCommonData(data, tenBisData);
 				sendToServer(server + joinUrl, data, function(responseData) {
 					console.log('sent to server - success');
@@ -138,22 +144,24 @@ function join() {
 }
 
 function close() {
-	baseAction(function(){
+	baseAction(function(url){
 		get10BisData(function(res) {
 			var data = {};
-			addCommonData(data, res);
-			addAllDishes(tempDishes, 
-			function(data){
-				console.log(data);
-				if (data == true) {
-					renderStatus('success');
-				} else if(data == false) {
+			addCommonData(data, res)
+			sendToServer(server + closeUrl, data, function(dishesRes) {
+				addAllDishes(dishesRes.DishList, 
+				function(data){
+					console.log(data);
+					if (data == true) {
+						renderStatus('success');
+					} else if(data == false) {
+						renderStatus('failed');
+					}
+				}, function(err){
 					renderStatus('failed');
-				}
-			}, function(err){
-				renderStatus('failed');
-				console.error('error:', err);
-			}, doRefresh) ;
+					console.error('error:', err);
+				}, doRefresh) ;
+			});
 		});
 	});
 }
@@ -163,7 +171,7 @@ function baseAction(cb) {
 				renderStatus('tab is not 10bis');
 				return;
 			}
-			cb();
+			cb(url);
 		});
 }
 
