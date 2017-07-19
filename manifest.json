@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+
+  "name": "Lazy SlackBis",
+  "description": "Order 10Bis without raising your butt from your chair",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html",
+    "default_title": "Open/Join 10Bis Order"
+  },
+  "permissions": [
+    "activeTab",
+    "http://*/*",
+	"https://*/*"
+  ],
+  "background": {
+	"scripts": ["thirdParty/jquery.min.js"]
+  },
+  "content_scripts":[
+	{
+		"matches": ["http://www.google.com/*"],
+		"css": [],
+		"js": ["thirdParty/jquery.min.js", "popup.js"]
+	}
+  ]
+}
