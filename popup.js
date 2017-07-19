@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+String.prototype.contains = function(x){return this.indexOf(x)>-1;}
 
 var server = 'http://172.16.50.88:9000/HungrySlackers';
 var openUrl = '/Invite';
 var joinUrl = '/join';
 var closeUrl = '/close';
+var cancelUrl = '/cancel';
+
 
 var tempDishes;
 
@@ -94,68 +97,88 @@ function addCommonData(data, res) {
 	data.RestaurantId = res.Restaurant.RestaurantId;
 	data.RestaurantName = res.Restaurant.RestaurantName;
 	
-	console.log(data);
-	console.log(JSON.stringify(data));
+	//console.log(data);
+	//console.log(JSON.stringify(data));
 }
 function openNewOrder() {
-	getCurrentTabUrl(function(url) {
-	get10BisData(function(res) {
-		var data = { 
-				url: url				
-		};
-		addCommonData(data, res);	
-		sendToServer(server + openUrl, data, function(responseData) {
-			// TODO - process response here
-			console.log('sent to server - success');
+	baseAction(function(){
+		get10BisData(function(res) {
+			var data = { 
+					url: url				
+			};
+			addCommonData(data, res);	
+			sendToServer(server + openUrl, data, function(responseData) {
+				// TODO - process response here
+				console.log('sent to server - success');
 
-    }, function(errorMessage) {
-      renderStatus('Failed to open new order. ' + errorMessage);
-    });
+		}, function(errorMessage) {
+		  renderStatus('Failed to open new order. ' + errorMessage);
+		});
 	});
   });
 }
 
 function join() {
-	get10BisData(function(tenBisData){
-		getOrderConfirmation(function(orderConfirmationData) {
-			var data = {
-				DishList : orderConfirmationData.DishList
-			};
-			
-			//temporary
-			tempDishes = data.DishList;
-			addCommonData(data, tenBisData);
-			sendToServer(server + joinUrl, data, function(responseData) {
-				console.log('sent to server - success');
-			});
-		})
+	baseAction(function(){
+		get10BisData(function(tenBisData){
+			getOrderConfirmation(function(orderConfirmationData) {
+				var data = {
+					DishList : orderConfirmationData.DishList
+				};
+				
+				//temporary
+				tempDishes = data.DishList;
+				addCommonData(data, tenBisData);
+				sendToServer(server + joinUrl, data, function(responseData) {
+					console.log('sent to server - success');
+				});
+			})
+		});
 	});
-
 }
 
 function close() {
-	get10BisData(function(res) {
-		var data = {};
-		addCommonData(data, res);
-		addAllDishes(tempDishes, 
-		function(data){
-			console.log(data);
-			if (data == true) {
-				renderStatus('success');
-			} else if(data == false) {
+	baseAction(function(){
+		get10BisData(function(res) {
+			var data = {};
+			addCommonData(data, res);
+			addAllDishes(tempDishes, 
+			function(data){
+				console.log(data);
+				if (data == true) {
+					renderStatus('success');
+				} else if(data == false) {
+					renderStatus('failed');
+				}
+			}, function(err){
 				renderStatus('failed');
-			}
-		}, function(err){
-			renderStatus('failed');
-			console.error('error:', err);
-		}, doRefresh) ;
-		/*
-		sendToServer(server + closeUrl, data, function(response) {
-			var dishList = response.dishList;
-			addAllDishes(dishList);
+				console.error('error:', err);
+			}, doRefresh) ;
 		});
-		*/
 	});
+}
+function baseAction(cb) {
+		getCurrentTabUrl(function(url) {
+			if (!url.contains('www.10bis.co.il')) {
+				renderStatus('tab is not 10bis');
+				return;
+			}
+			cb();
+		});
+}
+
+function cancel () {
+	baseAction(function() {
+		get10BisData(function(res) {
+			data = {};
+			addCommonData(data, res);
+			sendToServer(server + cancelUrl, data, function(response) {
+				renderStatus('Order canceled');
+			});
+			
+		});
+	});
+	
 }
 
 function get10BisData(cb) {
@@ -190,6 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("close-btn").addEventListener("click", function() {
 	close();
   });
-
+  document.getElementById("cancel-btn").addEventListener("click", function() {
+	cancel();
+  });
   
 });

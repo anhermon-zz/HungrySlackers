@@ -19,6 +19,9 @@
         overflow: hidden;
         max-width: 400px;
       }
+	  #logo {
+		max-width: 200px;
+	  }
     </style>
 
     <!--
@@ -32,17 +35,19 @@
    <script src="thirdParty/jquery.min.js"></script>
 	<style>
 		.menu-button {
-			width: 120px;
+			width: 200px;
 		}
 	</style>
 	
   </head>
   <body>
 		<div>
+			<img id='logo' src="img/logo.jpeg"/>
 			<div id="status" class="menu-button"></div>
 			<button type="button" id="open-btn" class="btn btn-danger menu-button">Open</button>
 			<button type="button" id="join-btn" class="btn btn-danger menu-button">Join</button>
 			<button type="button" id="close-btn" class="btn btn-danger menu-button">Close</button>
+			<button type="button" id="cancel-btn" class="btn btn-danger menu-button">Cancel</button>
 		</div>
   </body>
 </html>
