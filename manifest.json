@@ -18,6 +18,7 @@
   "background": {
 	"scripts": ["thirdParty/jquery.min.js"]
   },
+  "web_accessible_resources": ["logo.png"],
   "content_scripts":[
 	{
 		"matches": ["http://www.google.com/*"],
