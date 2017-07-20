@@ -121,12 +121,19 @@
     }
 
     function addDish(dish, cb, onError) {
-        dish = JSON.stringify({dishToSubmit: dish});
+        var dishToSubmit = {};
+        dishToSubmit.AssignedUserId = dish.DishUserId;
+        dishToSubmit.ID = dish.ID;
+        dishToSubmit.DishOwnerId = dish.DishOwnerId;
+        dishToSubmit.Quantity = dish.Quantity;
+        dishToSubmit.DishNotes = dish.DishNotes;
+
+        dishToSubmit = JSON.stringify({dishToSubmit: dishToSubmit});
         $.ajax({
             url: addDishAjaxUrl,
             type: "POST",
             contentType: "application/json",
-            data: dish
+            data: dishToSubmit
         }).done(cb).fail(onError);
     }
 
