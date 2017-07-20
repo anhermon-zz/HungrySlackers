@@ -86,10 +86,8 @@
             url: url,
             type: "POST",
             contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(dataToSend),
-            success: callback
-        }).fail(errorCallback);
+            data: JSON.stringify(dataToSend)
+        }).done(callback).fail(errorCallback);
 
         //$.post(url, dataToSend, callback)
         //.fail(errorCallback);
@@ -123,10 +121,13 @@
     }
 
     function addDish(dish, cb, onError) {
-        dish = {dishToSubmit: dish};
-        return $.post(addDishAjaxUrl, Json.stringify(dish))
-            .done(cb)
-            .fail(onError);
+        dish = JSON.stringify({dishToSubmit: dish});
+        $.ajax({
+            url: addDishAjaxUrl,
+            type: "POST",
+            contentType: "application/json",
+            data: dish
+        }).done(cb).fail(onError);
     }
 
     function addAllDishes(dishes, cb, onError, onFinishedAll) {
@@ -161,10 +162,12 @@
                     try {
                         data.UserName = orderConfirmationData.DishList[0].DishUserName;
                     } catch (e) {}
+                    if (!data.UserName) {
+                        data.UserName = 'John doe';
+                    }
                     sendToServer(server + openUrl, data, function (responseData) {
-                        // TODO - process response here
-                        console.log('sent to server - success');
-
+                        //TODO:gradually close
+                        window.close();
                     }, function (errorMessage) {
                         renderStatus('Failed to open new order. ', errorMessage);
                     });
@@ -182,9 +185,9 @@
                     };
 
                     addCommonData(data, tenBisData);
-                    sendToServer(server + joinUrl, data, function (responseData) {
-                        console.log('sent to server - success');
-                    }, function (errorMessage) {
+                    sendToServer(server + joinUrl, data, function (responseData, status) {
+                        window.close();
+                    }, function (errorMessage, status) {
                         renderStatus('Join order failed.', errorMessage);
                     });
                 });
@@ -202,7 +205,7 @@
                         function (data) {
                             console.log(data);
                             if (data === true) {
-                                renderStatus('success');
+                                window.close();
                             } else if (data === false) {
                                 renderStatus('failed');
                             }
