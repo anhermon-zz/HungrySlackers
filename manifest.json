@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
 
-  "name": "Lazy SlackBis",
-  "description": "Order 10Bis without raising your butt from your chair",
+  "name": "CyberBis",
+  "description": "Eat more, communicate less",
   "version": "1.0",
 
   "browser_action": {
@@ -25,5 +25,9 @@
 		"css": [],
 		"js": ["thirdParty/jquery.min.js", "popup.js"]
 	}
-  ]
+  ],
+  "icons": {
+     "16": "img/icon16.png",
+     "48": "img/icon48.png",
+     "128": "img/icon128.png" }
 }
