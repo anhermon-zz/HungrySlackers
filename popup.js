@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    /*global $, chrome, console*/
+    /*global $, chrome, console, Json*/
 
     String.prototype.contains = function (x) {
         return this.indexOf(x) > -1;
@@ -123,7 +123,8 @@
     }
 
     function addDish(dish, cb, onError) {
-        return $.post(addDishAjaxUrl, dish)
+        dish = {dishToSubmit: dish};
+        return $.post(addDishAjaxUrl, Json.stringify(dish))
             .done(cb)
             .fail(onError);
     }
