@@ -11,9 +11,10 @@
     "default_title": "Open/Join 10Bis Order"
   },
   "background": {
-    "scripts": ["thirdParty/jquery.min.js"]
+    "scripts": ["thirdParty/jquery.min.js", "background.js"]
   },
   "permissions": [
+    "notifications",
     "activeTab",
     "http://*/*",
 	"https://*/*"

@@ -28,6 +28,20 @@
         });
     }
 
+    function sendNotification(title, message) {
+        var options = {
+            type: "basic",
+            title: title,
+            message: message,
+            iconUrl: "img/icon48.png"
+        };
+
+        chrome.runtime.sendMessage({
+            from: 'cyber bis',
+            body: options
+        });
+    }
+
     /**
      * Get the current URL.
      *
@@ -86,7 +100,8 @@
             url: url,
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify(dataToSend)
+            data: JSON.stringify(dataToSend),
+            timeout: 2000
         }).done(callback).fail(errorCallback);
 
         //$.post(url, dataToSend, callback)
@@ -128,7 +143,9 @@
         dishToSubmit.Quantity = dish.Quantity;
         dishToSubmit.DishNotes = dish.DishNotes;
 
-        dishToSubmit = JSON.stringify({dishToSubmit: dishToSubmit});
+        dishToSubmit = JSON.stringify({
+            dishToSubmit: dishToSubmit
+        });
         $.ajax({
             url: addDishAjaxUrl,
             type: "POST",
@@ -151,7 +168,7 @@
     function baseAction(cb) {
         getCurrentTabUrl(function (url) {
             if (!url.contains('www.10bis.co.il')) {
-                renderStatus('tab is not 10bis');
+                sendNotification('Warning', 'You need to browse 10bis do this.');
                 return;
             }
             cb(url);
@@ -173,10 +190,9 @@
                         data.UserName = 'John doe';
                     }
                     sendToServer(server + openUrl, data, function (responseData) {
-                        //TODO:gradually close
-                        window.close();
+                        sendNotification('Success', 'Your order opened successfully.');
                     }, function (errorMessage) {
-                        renderStatus('Failed to open new order. ', errorMessage);
+                        sendNotification('Failure', 'Failed to open new order.' + errorMessage.responseText);
                     });
                 });
             });
@@ -193,9 +209,9 @@
 
                     addCommonData(data, tenBisData);
                     sendToServer(server + joinUrl, data, function (responseData, status) {
-                        window.close();
+                        sendNotification('Success', 'You joined an order succesfully.');
                     }, function (errorMessage, status) {
-                        renderStatus('Join order failed.', errorMessage);
+                        sendNotification('Failure', 'Join order failed, error:' + errorMessage.responseText);
                     });
                 });
             });
@@ -211,18 +227,16 @@
                     addAllDishes(dishesRes.DishList,
                         function (data) {
                             console.log(data);
-                            if (data === true) {
-                                window.close();
-                            } else if (data === false) {
-                                renderStatus('failed');
+                            if (data === false) {
+                                sendNotification('Success', 'Order was finalized succesfully.');
+
                             }
                         },
-                        function (err) {
-                            renderStatus('Order finalization failed.', err);
-
+                        function (errorMessage) {
+                            sendNotification('Failed', 'Order finalization failed.' + errorMessage.responseText);
                         }, doRefresh);
-                }, function (err) {
-                    renderStatus('Order finalization failed.', err);
+                }, function (errorMessage) {
+                    sendNotification('Failed', 'Order finalization failed.' + errorMessage.responseText);
                 });
             });
         });
